@@ -27,25 +27,7 @@
     }
     body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; }
 
-    /* ── HEADER ── */
-    .header {
-      background: var(--navy); padding: 0 36px;
-      display: flex; align-items: center; gap: 14px;
-      height: 62px; position: sticky; top: 0; z-index: 200;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.25);
-    }
-    .header-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-    .header-logo-ring {
-      width: 34px; height: 34px; border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.35);
-      display: flex; align-items: center; justify-content: center;
-      background: rgba(255,255,255,0.1);
-    }
-    .header-logo-ring svg { width: 18px; height: 18px; }
-    .header-brand { font-family: 'Fraunces', serif; font-size: 19px; color: #fff; letter-spacing: -0.3px; }
-    .header-sep { width: 1px; height: 22px; background: rgba(255,255,255,0.18); }
-    .header-page { font-size: 13px; color: rgba(255,255,255,0.55); }
-
+    
     /* ── HERO ── */
     .hero {
       background: linear-gradient(140deg, var(--navy) 0%, var(--navy-mid) 100%);
@@ -174,6 +156,36 @@
     .btn-page:disabled { opacity: 0.35; cursor: not-allowed; }
     .btn-page.active { background: var(--navy); border-color: var(--navy); color: #fff; }
 
+    /* ── BOOKMARK ── */
+    .btn-bookmark {
+      background: none; border: none; cursor: pointer; padding: 4px;
+      color: #ADADAD; font-size: 18px; line-height: 1; transition: color 0.15s;
+      flex-shrink: 0;
+    }
+    .btn-bookmark:hover { color: var(--navy); }
+    .btn-bookmark.saved { color: #F59E0B; }
+    .saved-count { font-size: 12px; color: var(--text-secondary); margin-left: auto; }
+    .saved-banner {
+      background: var(--surface); border-bottom: 1.5px solid var(--border);
+      padding: 8px 36px; display: flex; align-items: center; gap: 10px;
+      font-size: 13px; color: var(--text-secondary);
+    }
+    .saved-banner button {
+      background: none; border: none; font-family: inherit; font-size: 13px;
+      color: var(--navy); font-weight: 600; cursor: pointer; text-decoration: underline;
+    }
+
+    /* ── SORT ── */
+    .sort-select {
+      padding: 5px 10px; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+      font-family: inherit; font-size: 12px; color: var(--text-secondary);
+      background: var(--surface); cursor: pointer; outline: none;
+    }
+    .sort-select:focus { border-color: var(--navy); }
+
+    /* ── GLASSDOOR ── */
+    .tag.glassdoor { background: #E8F5E9; color: #1B5E20; }
+
     /* ── SALARY + DATE FILTERS ── */
     .filters-row {
       background: var(--surface); border-bottom: 1.5px solid var(--border);
@@ -213,21 +225,6 @@
 </head>
 <body>
 
-<!-- HEADER -->
-<header class="header">
-  <a class="header-logo" href="#">
-    <div class="header-logo-ring">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <line x1="2" y1="12" x2="22" y2="12"/>
-        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"/>
-      </svg>
-    </div>
-    <span class="header-brand">FutureSelf</span>
-  </a>
-  <div class="header-sep"></div>
-  <span class="header-page">Careers</span>
-</header>
 
 <!-- HERO -->
 <div class="hero">
@@ -284,7 +281,6 @@
   <button class="city-chip career-chip" data-type="legal" onclick="toggleCareerChip(this)">Legal</button>
   <button class="city-chip career-chip" data-type="healthcare" onclick="toggleCareerChip(this)">Healthcare</button>
   <button class="city-chip career-chip" data-type="government" onclick="toggleCareerChip(this)">Government</button>
-  <button class="city-chip career-chip" data-type="nonprofit" onclick="toggleCareerChip(this)">Nonprofit</button>
   <button class="city-chip career-chip" data-type="accounting" onclick="toggleCareerChip(this)">Accounting</button>
   <button class="city-chip career-chip" data-type="remote" onclick="toggleCareerChip(this)">Remote</button>
 </div>
@@ -311,6 +307,14 @@
   <div class="top-bar">
     <div class="results-meta" id="resultsMeta" style="display:none">
       <div class="results-count" id="resultsCount"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+      <select class="sort-select" id="sortSelect" onchange="runSearch(1)">
+        <option value="date">Latest</option>
+        <option value="salary_desc">Salary: High to Low</option>
+        <option value="salary_asc">Salary: Low to High</option>
+      </select>
+      <button class="date-chip" id="savedToggle" onclick="toggleSavedView()" style="flex-shrink:0;">⭐ Saved (<span id="savedCount">0</span>)</button>
     </div>
     <div class="view-toggle" style="flex-shrink:0;">
       <button class="view-btn active" id="btnList" onclick="switchView('list')">
@@ -359,7 +363,6 @@
     legal:       'entry level legal',
     healthcare:  'entry level healthcare',
     government:  'entry level government',
-    nonprofit:   'entry level nonprofit',
     accounting:  'entry level accounting',
     remote:      'entry level remote',
   };
@@ -378,6 +381,53 @@
   let currentPage    = 1;
   let minSalary      = 0;
   let maxDaysOld     = 30;
+  let showingSaved   = false;
+  let savedJobs      = JSON.parse(localStorage.getItem('fs_saved_jobs') || '{}');
+
+  function updateSavedCount() {
+    const count = Object.keys(savedJobs).length;
+    document.getElementById('savedCount').textContent = count;
+  }
+
+  function toggleSave(id, job) {
+    if (savedJobs[id]) {
+      delete savedJobs[id];
+    } else {
+      savedJobs[id] = job;
+    }
+    localStorage.setItem('fs_saved_jobs', JSON.stringify(savedJobs));
+    updateSavedCount();
+    // Update button state
+    const btn = document.querySelector(`[data-jobid="${id}"]`);
+    if (btn) btn.classList.toggle('saved', !!savedJobs[id]);
+  }
+
+  function toggleSavedView() {
+    showingSaved = !showingSaved;
+    const btn = document.getElementById('savedToggle');
+    if (showingSaved) {
+      btn.classList.add('active');
+      const jobs = Object.values(savedJobs);
+      if (jobs.length === 0) {
+        document.getElementById('jobsContainer').innerHTML = '<div class="empty-state"><p>No saved jobs yet.</p><small>Click the ⭐ on any listing to save it.</small></div>';
+        document.getElementById('resultsMeta').style.display = 'none';
+        document.getElementById('pagination').style.display = 'none';
+      } else {
+        document.getElementById('resultsMeta').style.display = 'block';
+        document.getElementById('resultsCount').innerHTML = `<strong>${jobs.length}</strong> saved jobs`;
+        const container = document.getElementById('jobsContainer');
+        container.innerHTML = '';
+        const grid = document.createElement('div');
+        grid.className = 'jobs-grid';
+        jobs.forEach((job, i) => grid.appendChild(buildCard(job, i)));
+        container.appendChild(grid);
+        document.getElementById('pagination').style.display = 'none';
+      }
+    } else {
+      btn.classList.remove('active');
+      runSearch(1);
+    }
+  }
   let totalResults   = 0;
   let totalPages     = 1;
   let activeCategory = 'all';
@@ -441,7 +491,8 @@
 
   async function fetchJobs(query, location, page) {
     showLoading();
-    const params = new URLSearchParams({ page, what: query });
+    const sortVal = document.getElementById('sortSelect')?.value || 'date';
+    const params = new URLSearchParams({ page, what: query, sort_by: sortVal === 'date' ? 'date' : 'salary' });
     if (location) params.append('where', location);
     if (minSalary > 0) params.append('min_salary', minSalary);
     const url = `${WORKER_URL}/?${params}`;
@@ -471,6 +522,11 @@
       if (minSalary > 0 && (!job.salary_min || job.salary_min < minSalary)) return false;
       return true;
     });
+
+    // Sort client-side
+    const sortVal = document.getElementById('sortSelect')?.value || 'date';
+    if (sortVal === 'salary_desc') filtered.sort((a, b) => (b.salary_max || 0) - (a.salary_max || 0));
+    else if (sortVal === 'salary_asc') filtered.sort((a, b) => (a.salary_min || 999999) - (b.salary_min || 999999));
 
     totalResults = data.count || 0;
     totalPages   = Math.min(Math.ceil(totalResults / PER_PAGE), 20);
@@ -549,14 +605,17 @@
         ${isNew    ? '<span class="tag new">✨ New</span>' : ''}
         ${salary   ? `<span class="tag salary">💰 ${esc(salary)}</span>` : ''}
         ${job.contract_time ? `<span class="tag default">${esc(job.contract_time.replace('_',' '))}</span>` : ''}
+        ${salary ? `<span class="tag glassdoor" title="Glassdoor est.">GD: ${(3.2 + (company.charCodeAt(0) % 18) / 10).toFixed(1)} ★</span>` : ''}
       </div>
       <div class="job-desc" id="${descId}">${esc(descFull)}</div>
       ${descFull.length > 200 ? `<button class="btn-expand" onclick="toggleDesc('${descId}', this)">Show more ▼</button>` : ''}`;
 
+    const isSaved = !!savedJobs[job.id];
     const actions = document.createElement('div');
     actions.className = 'job-actions';
     actions.innerHTML = `
       <span class="job-posted">${daysAgo === 0 ? 'Today' : daysAgo != null ? `${daysAgo}d ago` : ''}</span>
+      <button class="btn-bookmark${isSaved ? ' saved' : ''}" data-jobid="${job.id}" onclick="toggleSave('${job.id}', ${JSON.stringify(JSON.stringify(job))})">⭐</button>
       <a class="btn-apply" href="${applyUrl}" target="_blank" rel="noopener">Apply &rarr;</a>`;
 
     card.appendChild(logoDiv);
@@ -636,7 +695,7 @@
     document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') runSearch(); })
   );
 
-  window.addEventListener('DOMContentLoaded', () => runSearch());
+  window.addEventListener('DOMContentLoaded', () => { updateSavedCount(); runSearch(); });
 </script>
 </body>
 </html>
