@@ -309,16 +309,6 @@
       </select>
       <button class="date-chip" id="savedToggle" onclick="toggleSavedView()" style="flex-shrink:0;">☆ Saved (<span id="savedCount">0</span>)</button>
     </div>
-    <div class="view-toggle" style="flex-shrink:0;">
-      <button class="view-btn active" id="btnList" onclick="switchView('list')">
-        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
-          <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
-        </svg>
-        List
-      </button>
-
-    </div>
   </div>
 
   <div id="listView">
@@ -353,20 +343,11 @@
     remote:      'entry level remote OR remote analyst OR remote associate',
   };
 
-  const CAT_COLORS = {
-    'it-jobs':                '#3B82F6',
-    'engineering-jobs':       '#F59E0B',
-    'accounting-finance-jobs':'#10B981',
-    'legal-jobs':             '#8B5CF6',
-    'sales-jobs':             '#EF4444',
-    'marketing-jobs':         '#EC4899',
-    'admin-jobs':             '#6B7280',
-    'default':                '#2C3E50',
-  };
+  
 
   let currentPage    = 1;
   let minSalary      = 0;
-  let maxDaysOld     = 30;
+  let maxDaysOld     = 60;
   let showingSaved   = false;
   let savedJobs      = JSON.parse(localStorage.getItem('fs_saved_jobs') || '{}');
   const jobCache     = {};
@@ -423,7 +404,7 @@
   let totalPages     = 1;
   let activeCategory = 'all';
   let activeCity     = '';
-  let lastJobs       = [];
+  
 
   function toggleCity(el) {
     document.querySelectorAll('.city-chip:not(.career-chip)').forEach(c => c.classList.remove('active'));
@@ -492,11 +473,14 @@
     const countEl   = document.getElementById('resultsCount');
     const jobs      = data.results || [];
 
-    // Filter by selected date range
+    // Filter to entry level, analyst, associate only + salary
     const filtered = jobs.filter(job => {
-      if (!job.created) return false;
-      const daysOld = Math.floor((Date.now() - new Date(job.created)) / 86400000);
-      if (daysOld > maxDaysOld) return false;
+      const text = ((job.title || '') + ' ' + (job.description || '')).toLowerCase();
+      const isEntryLevel = text.includes('entry level') || text.includes('entry-level') ||
+        text.includes('analyst') || text.includes('associate') ||
+        text.includes('junior') || text.includes('graduate') ||
+        text.includes('early career') || text.includes('new grad');
+      if (!isEntryLevel) return false;
       if (minSalary > 0 && (!job.salary_min || job.salary_min < minSalary)) return false;
       return true;
     });
@@ -654,20 +638,6 @@
   );
 
   window.addEventListener('DOMContentLoaded', () => {
-    // Default: Finance category, New York city
-    activeCategory = 'finance';
-    activeCity = 'New York';
-
-    // Set finance chip active
-    document.querySelectorAll('.career-chip').forEach(c => {
-      c.classList.toggle('active', c.dataset.type === 'finance');
-    });
-
-    // Set New York city chip active
-    document.querySelectorAll('.city-chip:not(.career-chip)').forEach(c => {
-      c.classList.toggle('active', c.dataset.city === 'New York');
-    });
-
     updateSavedCount();
     runSearch();
   });
