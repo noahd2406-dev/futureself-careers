@@ -473,14 +473,8 @@
     const countEl   = document.getElementById('resultsCount');
     const jobs      = data.results || [];
 
-    // Filter to entry level, analyst, associate only + salary
+    // Filter by salary only
     const filtered = jobs.filter(job => {
-      const text = ((job.title || '') + ' ' + (job.description || '')).toLowerCase();
-      const isEntryLevel = text.includes('entry level') || text.includes('entry-level') ||
-        text.includes('analyst') || text.includes('associate') ||
-        text.includes('junior') || text.includes('graduate') ||
-        text.includes('early career') || text.includes('new grad');
-      if (!isEntryLevel) return false;
       if (minSalary > 0 && (!job.salary_min || job.salary_min < minSalary)) return false;
       return true;
     });
