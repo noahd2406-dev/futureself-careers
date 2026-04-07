@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FutureSelf — Careers</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -127,14 +125,7 @@
     }
     .btn-apply:hover { background: var(--navy-dark); }
 
-    /* ── MAP ── */
-    #mapView { display: none; }
-    #mapContainer { height: 560px; border-radius: var(--radius); overflow: hidden; border: 1.5px solid var(--border); box-shadow: var(--shadow); }
-    .leaflet-popup-content-wrapper { border-radius: 10px !important; box-shadow: var(--shadow-hover) !important; font-family: 'DM Sans', sans-serif !important; }
-    .map-popup-title { font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 3px; }
-    .map-popup-company { font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; }
-    .map-popup-apply { display: inline-block; padding: 6px 14px; background: var(--navy); color: #fff; border-radius: 7px; font-size: 12px; font-weight: 600; text-decoration: none; }
-    .map-popup-apply:hover { background: var(--navy-dark); }
+
 
     /* ── STATES ── */
     .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; gap: 14px; }
@@ -326,13 +317,7 @@
         </svg>
         List
       </button>
-      <button class="view-btn" id="btnMap" onclick="switchView('map')">
-        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
-          <line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>
-        </svg>
-        Map
-      </button>
+
     </div>
   </div>
 
@@ -346,9 +331,6 @@
     <div class="pagination" id="pagination" style="display:none"></div>
   </div>
 
-  <div id="mapView">
-    <div id="mapContainer"></div>
-  </div>
 </div>
 
 <script>
@@ -441,8 +423,6 @@
   let totalPages     = 1;
   let activeCategory = 'all';
   let activeCity     = '';
-  let currentView    = 'list';
-  let mapInstance    = null;
   let lastJobs       = [];
 
   function toggleCity(el) {
@@ -479,17 +459,7 @@
     return keyword ? `${keyword} entry level ${base}` : base;
   }
 
-  function switchView(view) {
-    currentView = view;
-    document.getElementById('listView').style.display = view === 'list' ? 'block' : 'none';
-    document.getElementById('mapView').style.display  = view === 'map'  ? 'block' : 'none';
-    document.getElementById('btnList').classList.toggle('active', view === 'list');
-    document.getElementById('btnMap').classList.toggle('active',  view === 'map');
-    if (view === 'map') {
-      if (lastJobs.length) renderMap(lastJobs);
-      else runSearch(1);
-    }
-  }
+
 
   function runSearch(page = 1) {
     currentPage = page;
@@ -511,7 +481,6 @@
       const data = await res.json();
       lastJobs = data.results || [];
       renderJobs(data, page);
-      if (currentView === 'map') renderMap(lastJobs);
     } catch (err) {
       showError(err.message);
     }
@@ -637,31 +606,7 @@
     return card;
   }
 
-  function renderMap(jobs) {
-    if (!mapInstance) {
-      mapInstance = L.map('mapContainer').setView([39.5, -98.35], 4);
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19
-      }).addTo(mapInstance);
-    } else {
-      mapInstance.eachLayer(layer => { if (layer instanceof L.CircleMarker) mapInstance.removeLayer(layer); });
-    }
-    jobs.forEach(job => {
-      if (!job.latitude || !job.longitude) return;
-      const color    = CAT_COLORS[job.category?.tag] || CAT_COLORS.default;
-      const company  = job.company?.display_name || 'Unknown';
-      const applyUrl = job.redirect_url || '#';
-      L.circleMarker([job.latitude, job.longitude], {
-        radius: 9, fillColor: color, color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.88
-      }).addTo(mapInstance).bindPopup(`
-        <div style="font-family:'DM Sans',sans-serif;min-width:190px;">
-          <div class="map-popup-title">${esc(job.title || 'Position')}</div>
-          <div class="map-popup-company">${esc(company)} &middot; ${esc(job.location?.display_name || '')}</div>
-          <a class="map-popup-apply" href="${applyUrl}" target="_blank" rel="noopener">View &amp; Apply &rarr;</a>
-        </div>`);
-    });
-    setTimeout(() => mapInstance.invalidateSize(), 100);
-  }
+
 
   function renderPagination(current) {
     const pg = document.getElementById('pagination');
