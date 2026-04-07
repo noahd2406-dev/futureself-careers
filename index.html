@@ -481,8 +481,22 @@
 
     // Sort client-side
     const sortVal = document.getElementById('sortSelect')?.value || 'date';
-    if (sortVal === 'salary_desc') filtered.sort((a, b) => (b.salary_max || 0) - (a.salary_max || 0));
-    else if (sortVal === 'salary_asc') filtered.sort((a, b) => (a.salary_min || 999999) - (b.salary_min || 999999));
+    if (sortVal === 'salary_desc') {
+      filtered.sort((a, b) => (b.salary_max || 0) - (a.salary_max || 0));
+    } else if (sortVal === 'salary_asc') {
+      filtered.sort((a, b) => (a.salary_min || 999999) - (b.salary_min || 999999));
+    } else {
+      // Default: sort entry level / analyst / associate to top
+      const score = job => {
+        const t = (job.title || '').toLowerCase();
+        if (t.includes('entry level') || t.includes('entry-level')) return 0;
+        if (t.includes('analyst')) return 1;
+        if (t.includes('associate')) return 2;
+        if (t.includes('junior') || t.includes('jr')) return 3;
+        return 4;
+      };
+      filtered.sort((a, b) => score(a) - score(b));
+    }
 
     totalResults = data.count || 0;
     totalPages   = Math.min(Math.ceil(totalResults / PER_PAGE), 20);
