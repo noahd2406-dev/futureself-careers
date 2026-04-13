@@ -300,13 +300,6 @@
       oninput="updateSalaryDisplay(this.value)" onchange="runSearch(1)" />
     <span class="salary-value" id="salaryDisplay">Any</span>
   </div>
-  <div class="filter-group">
-    <span class="filter-label">Posted</span>
-    <button class="date-chip active" data-days="30" onclick="toggleDateChip(this)">Last 30d</button>
-    <button class="date-chip" data-days="14" onclick="toggleDateChip(this)">Last 14d</button>
-    <button class="date-chip" data-days="7" onclick="toggleDateChip(this)">Last 7d</button>
-    <button class="date-chip" data-days="1" onclick="toggleDateChip(this)">Today</button>
-  </div>
 </div>
 
 <!-- MAIN -->
@@ -389,7 +382,7 @@
 
   let currentPage    = 1;
   let minSalary      = 0;
-  let maxDaysOld     = 30;
+  let maxDaysOld     = 9999;
   let showingSaved   = false;
   let totalResults   = 0;
   let totalPages     = 1;
