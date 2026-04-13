@@ -386,6 +386,13 @@
   let minSalary      = 0;
   let maxDaysOld     = 30;
   let showingSaved   = false;
+  let totalResults   = 0;
+  let totalPages     = 1;
+  let activeCategory = 'all';
+  let activeCity     = '';
+  let currentView    = 'list';
+  let mapInstance    = null;
+  let lastJobs       = [];
   let savedJobs      = JSON.parse(localStorage.getItem('fs_saved_jobs') || '{}');
   const jobCache     = {};
 
@@ -437,14 +444,6 @@
       runSearch(1);
     }
   }
-  let totalResults   = 0;
-  let totalPages     = 1;
-  let activeCategory = 'all';
-  let activeCity     = '';
-  let currentView    = 'list';
-  let mapInstance    = null;
-  let lastJobs       = [];
-
   function toggleCity(el) {
     document.querySelectorAll('.city-chip:not(.career-chip)').forEach(c => c.classList.remove('active'));
     el.classList.add('active');
