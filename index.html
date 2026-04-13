@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FutureSelf — Careers</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Fraunces:wght@600;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -130,7 +128,6 @@
     /* ── MAP ── */
     #mapView { display: none; }
     #mapContainer { height: 560px; border-radius: var(--radius); overflow: hidden; border: 1.5px solid var(--border); box-shadow: var(--shadow); }
-    .leaflet-popup-content-wrapper { border-radius: 10px !important; box-shadow: var(--shadow-hover) !important; font-family: 'DM Sans', sans-serif !important; }
     .map-popup-title { font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 3px; }
     .map-popup-company { font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; }
     .map-popup-apply { display: inline-block; padding: 6px 14px; background: var(--navy); color: #fff; border-radius: 7px; font-size: 12px; font-weight: 600; text-decoration: none; }
@@ -639,29 +636,7 @@
   }
 
   function renderMap(jobs) {
-    if (!mapInstance) {
-      mapInstance = L.map('mapContainer').setView([39.5, -98.35], 4);
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19
-      }).addTo(mapInstance);
-    } else {
-      mapInstance.eachLayer(layer => { if (layer instanceof L.CircleMarker) mapInstance.removeLayer(layer); });
-    }
-    jobs.forEach(job => {
-      if (!job.latitude || !job.longitude) return;
-      const color    = CAT_COLORS[job.category?.tag] || CAT_COLORS.default;
-      const company  = job.company?.display_name || 'Unknown';
-      const applyUrl = job.redirect_url || '#';
-      L.circleMarker([job.latitude, job.longitude], {
-        radius: 9, fillColor: color, color: '#fff', weight: 2, opacity: 1, fillOpacity: 0.88
-      }).addTo(mapInstance).bindPopup(`
-        <div style="font-family:'DM Sans',sans-serif;min-width:190px;">
-          <div class="map-popup-title">${esc(job.title || 'Position')}</div>
-          <div class="map-popup-company">${esc(company)} &middot; ${esc(job.location?.display_name || '')}</div>
-          <a class="map-popup-apply" href="${applyUrl}" target="_blank" rel="noopener">View &amp; Apply &rarr;</a>
-        </div>`);
-    });
-    setTimeout(() => mapInstance.invalidateSize(), 100);
+    document.getElementById('mapContainer').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#5D6D7E;font-family:DM Sans,sans-serif;font-size:14px;">Map view coming soon.</div>';
   }
 
   function renderPagination(current) {
