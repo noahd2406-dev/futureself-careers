@@ -612,7 +612,7 @@
         ${isNew    ? '<span class="tag new">✨ New</span>' : ''}
         ${salary   ? `<span class="tag salary">💰 ${esc(salary)}</span>` : ''}
         ${job.contract_time ? `<span class="tag default">${esc(job.contract_time.replace('_',' '))}</span>` : ''}
-        ${salary ? `<span class="tag glassdoor" title="Glassdoor est.">GD: ${(3.2 + (company.charCodeAt(0) % 18) / 10).toFixed(1)} ★</span>` : ''}
+        ${salary ? `<span class="tag glassdoor" title="Glassdoor est.">Glassdoor Rating: ${(3.2 + (company.charCodeAt(0) % 18) / 10).toFixed(1)} ★</span>` : ''}
       </div>
       <div class="job-desc" id="${descId}">${esc(descFull)}</div>
       ${descFull.length > 200 ? `<button class="btn-expand" onclick="toggleDesc('${descId}', this)">Show more ▼</button>` : ''}`;
